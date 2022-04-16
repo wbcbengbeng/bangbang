@@ -1,0 +1,269 @@
+﻿<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>
+        Intro to MapView - Create a 2D map | Sample | ArcGIS API for JavaScript
+        4.23
+    </title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #basemapGalleryDiv {
+            right: 10px;
+            top: 10px;
+        }
+
+        //body
+        body {
+            position: relative;
+        }
+
+        .yemei {
+            box-sizing: border-box;
+            height: 45px;
+            width: 123.5%;
+            background-color: #990099;
+            font-size: 30px;
+            color: black;
+            /*padding-left: 20px;*/
+        }
+        }
+    </style>
+
+    <link rel="stylesheet"
+          href="https://js.arcgis.com/4.23/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.23/"></script>
+
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/widgets/BasemapGallery",
+            "esri/widgets/Legend",
+            "esri/widgets/ScaleBar",
+            "esri/widgets/Search",
+            "esri/widgets/LayerList",
+            "esri/widgets/Home",
+            "esri/widgets/Measurement",
+            "esri/widgets/AreaMeasurement2D",
+            "esri/widgets/Compass",
+            "esri/widgets/Bookmarks",
+            "esri/widgets/Expand",
+            "esri/tasks/FindTask",
+            "esri/widgets/Editor",
+            "esri/popup/content/AttachmentsContent",
+            "esri/widgets/Print",
+            "esri/widgets/Track",
+            "esri/popup/content/TextContent"
+        ], (
+            Map,
+            MapView,
+            FeatureLayer,
+            BasemapGallery,
+            Legend,
+            ScaleBar,
+            Search,
+            LayerList,
+            Home,
+            Measurement,
+            AreaMeasurement2D,
+            Compass,
+            Bookmarks,
+            Expand,
+            FindTask,
+            Editor,
+            Print,
+            Track,
+            AttachmentsContent,
+            TextContent
+        ) => {
+                let features, editor;
+                //图层
+                const layer = new FeatureLayer({
+                    // URL to the service
+                    url: "https://www.geosceneonline.cn/server/rest/services/Hosted/hero/FeatureServer",
+                    title: "世界七大类型"
+                });
+
+                //map
+                const map = new Map({
+                    basemap: "hybrid"
+                });
+
+                //map.layers.add(layer);
+                map.addMany([layer]);
+
+                const view = new MapView({
+                    container: "viewDiv",
+                    map: map,
+                    extent: {
+                        // autocasts as new Extent()
+                        xmin: -1.101131870294E7,
+                        ymin: -3006855.757550002,
+                        xmax: 1.409757983574E7,
+                        ymax: 5546817.281350003,
+                        spatialReference: 102100
+                    }
+                });
+
+                let home = new Home({
+                    view: view
+                });
+                // adds the home widget to the top left corner of the MapView
+                view.ui.add(home, "top-left");
+                let layerList = new LayerList({
+                    view: view
+                });
+
+                const layerListExpand = new Expand({
+                    view: view,
+                    content: layerList,
+                    expanded: false
+                });
+                view.ui.add(layerListExpand, "top-left");
+
+                let compass = new Compass({
+                    view: view
+                });
+                // adds the compass to the top left corner of the MapView
+                view.ui.add(compass, "top-right");
+
+                let legend = new Legend(
+                    {
+                        view: view,
+                        style: "card",
+                        layerInfos: [
+                            {
+                                layer: layer,
+                                title: "世界七大类型"
+                            }]
+                    },
+                    "legend"
+                );
+                const legendExpand = new Expand({
+                    view: view,
+                    content: legend,
+                    expanded: false
+                });
+                view.ui.add(legendExpand, "top-left");
+
+                let scaleBar = new ScaleBar({
+                    view: view,
+                    style: "ruler",
+                    unit: "metric"
+                });
+                //Add widget to the bottom left corner of the view
+                view.ui.add(scaleBar, {
+                    position: "bottom-left"
+                });
+
+                //right
+
+                const search = new Search({
+                    view: view
+                });
+                // Adds the search widget below other elements in
+                // the top left corner of the view
+                view.ui.add(search, {
+                    position: "bottom-right",
+                    index: 2
+                });
+
+                let basemapGallery = new BasemapGallery(
+                    {
+                        view: view
+                    },
+                    "basemapGallery"
+                );
+                basemapGallery.startup;
+                // Add widget to the top right corner of the view
+
+                const basemapGalleryExpand = new Expand({
+                    view: view,
+                    content: basemapGallery,
+                    expanded: false
+                });
+
+                // Add the widget to the top-right corner of the view
+                view.ui.add(basemapGalleryExpand, "top-left");
+
+                // To add the AreaMeasurement2D widget to your map
+                let measurementWidget = new AreaMeasurement2D({
+                    view: view,
+                    activeTool: "area"
+                });
+
+                const measurementWidgetExpand = new Expand({
+                    view: view,
+                    content: measurementWidget,
+                    expanded: false
+                });
+                view.ui.add(measurementWidgetExpand, "top-left");
+
+                const measurement = new Measurement({
+                    view: view,
+                    activeTool: "distance"
+                });
+
+                const measurementExpand = new Expand({
+                    view: view,
+                    content: measurement,
+                    expanded: false
+                });
+
+                view.ui.add(measurementExpand, "top-left");
+
+                const bookmarks = new Bookmarks({
+                    view: view,
+                    // allows bookmarks to be added, edited, or deleted
+                    editingEnabled: true
+                });
+                const bookmarksExpand = new Expand({
+                    view: view,
+                    content: bookmarks,
+                    expanded: false
+                });
+                view.ui.add(bookmarksExpand, "top-left");
+
+                let track = new Track({
+                    view: view
+                });
+                const trackExpand = new Expand({
+                    view: view,
+                    content: track,
+                    expanded: false
+                });
+                view.ui.add(trackExpand, "top-left");
+
+                const print = new Print({
+                    view: view,
+                    // specify your own print service
+                    printServiceUrl:
+                        "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+                });
+
+
+            });
+    </script>
+</head>
+
+<body>
+    <div id="basemapGalleryDiv"></div>
+    <div class="yemei">
+        <b>世界七大奇迹</b>
+        <div id="searchdiv"></div>
+    </div>
+    <div id="viewDiv"></div>
+</body>
+</html>
